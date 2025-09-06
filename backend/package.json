@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --target=node --outdir=dist",
+    "start": "bun dist/index.js",
+    "prisma:generate": "bunx prisma generate",
+    "prisma:migrate": "bunx prisma migrate dev",
+    "prisma:studio": "bunx prisma studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hono/node-server": "^1.19.1",
+    "@prisma/client": "^6.15.0",
+    "hono": "^4.9.6",
+    "prisma": "^6.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "typescript": "^5.9.2"
+  }
+}
