@@ -60,6 +60,9 @@ model Meeting {
   bulletPoints      Json?     // Array of bullet points
   aiNotes           String?   @db.Text
   
+  // Source of the meeting data
+  source            String?   @default("ZOOM") // ZOOM, CSV_UPLOAD, MANUAL
+  
   userId            String
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   

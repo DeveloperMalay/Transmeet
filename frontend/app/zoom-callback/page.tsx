@@ -1,33 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Video, CheckCircle, XCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import axios from 'axios';
+import { useZoomCallback } from '@/hooks/useZoomAuth';
 
 export default function ZoomCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { token, updateUser, login } = useAuthStore();
-  const [isProcessing, setIsProcessing] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const { updateUser, login } = useAuthStore();
+  const { mutate: handleCallback, isPending, isSuccess, error, data } = useZoomCallback();
 
   useEffect(() => {
-    handleZoomCallback();
-  }, [searchParams]);
-
-  const handleZoomCallback = async () => {
     const code = searchParams.get('code');
     const state = searchParams.get('state');
     const errorParam = searchParams.get('error');
 
     // Handle Zoom OAuth errors
     if (errorParam) {
-      setError(`Zoom authorization failed: ${errorParam}`);
-      setIsProcessing(false);
       // Redirect back to connect-zoom page after delay
       setTimeout(() => {
         router.push('/connect-zoom');
@@ -37,63 +29,56 @@ export default function ZoomCallbackPage() {
 
     // Check if we have both code and state
     if (!code || !state) {
-      setError('Invalid callback parameters. Missing authorization code or state.');
-      setIsProcessing(false);
       setTimeout(() => {
         router.push('/connect-zoom');
       }, 3000);
       return;
     }
 
-    try {
-      // Send the code and state to backend
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/zoom/callback`,
-        { code, state },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    // Process the callback
+    handleCallback(
+      { code, state },
+      {
+        onSuccess: (response) => {
+          if (response.success) {
+            // Update user state with Zoom connection
+            if (response.user) {
+              updateUser(response.user);
+            }
+            
+            // Update tokens if provided
+            if (response.tokens) {
+              login({
+                user: response.user,
+                token: response.tokens.accessToken,
+                refreshToken: response.tokens.refreshToken,
+              });
+            }
 
-      if (response.data.success) {
-        // Update user state with Zoom connection
-        if (response.data.user) {
-          updateUser(response.data.user);
-        }
-        
-        // Update tokens if provided
-        if (response.data.tokens) {
-          login({
-            user: response.data.user,
-            token: response.data.tokens.accessToken,
-            refreshToken: response.data.tokens.refreshToken,
-          });
-        }
-
-        setIsSuccess(true);
-        setIsProcessing(false);
-        
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 2000);
+            // Redirect to dashboard after a short delay
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 2000);
+          }
+        },
+        onError: () => {
+          // Redirect back to connect-zoom page after delay
+          setTimeout(() => {
+            router.push('/connect-zoom');
+          }, 3000);
+        },
       }
-    } catch (err: any) {
-      console.error('Zoom callback error:', err);
-      setError(err.response?.data?.message || 'Failed to connect Zoom account. Please try again.');
-      setIsProcessing(false);
-      
-      // Redirect back to connect-zoom page after delay
-      setTimeout(() => {
-        router.push('/connect-zoom');
-      }, 3000);
-    }
-  };
+    );
+  }, [searchParams, handleCallback, updateUser, login, router]);
+
+  // Get error message from params or mutation error
+  const errorParam = searchParams.get('error');
+  const errorMessage = errorParam 
+    ? `Zoom authorization failed: ${errorParam}`
+    : error?.message || 'Failed to connect Zoom account. Please try again.';
 
   // Processing state
-  if (isProcessing) {
+  if (isPending) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
@@ -131,7 +116,7 @@ export default function ZoomCallbackPage() {
   }
 
   // Error state
-  if (error) {
+  if (error || errorParam) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center max-w-md">
@@ -142,7 +127,7 @@ export default function ZoomCallbackPage() {
             Connection Failed
           </h2>
           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-            {error}
+            {errorMessage}
           </p>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
             Redirecting back to connection page...
