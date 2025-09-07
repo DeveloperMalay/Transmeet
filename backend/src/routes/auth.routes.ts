@@ -62,6 +62,7 @@ authRoutes.post('/login', async (c) => {
       message: 'Login successful',
       user: result.user,
       tokens: result.tokens,
+      requiresVerification: result.requiresVerification,
     });
   } catch (error: any) {
     if (error instanceof HTTPException) {
@@ -69,6 +70,62 @@ authRoutes.post('/login', async (c) => {
     }
     console.error('Login error:', error);
     throw new HTTPException(500, { message: 'Login failed' });
+  }
+});
+
+/**
+ * POST /auth/verify-otp
+ * Verify OTP for email verification
+ */
+authRoutes.post('/verify-otp', authMiddleware, async (c) => {
+  try {
+    const { userId, otp } = await c.req.json();
+
+    if (!userId || !otp) {
+      throw new HTTPException(400, { message: 'User ID and OTP are required' });
+    }
+
+    const result = await AuthService.verifyOTP(userId, otp);
+
+    return c.json({
+      success: true,
+      message: 'Email verified successfully',
+      user: result.user,
+      tokens: result.tokens,
+    });
+  } catch (error: any) {
+    if (error instanceof HTTPException) {
+      throw error;
+    }
+    console.error('OTP verification error:', error);
+    throw new HTTPException(500, { message: 'OTP verification failed' });
+  }
+});
+
+/**
+ * POST /auth/resend-otp
+ * Resend OTP for email verification
+ */
+authRoutes.post('/resend-otp', authMiddleware, async (c) => {
+  try {
+    const { userId } = await c.req.json();
+
+    if (!userId) {
+      throw new HTTPException(400, { message: 'User ID is required' });
+    }
+
+    await AuthService.resendOTP(userId);
+
+    return c.json({
+      success: true,
+      message: 'OTP sent successfully',
+    });
+  } catch (error: any) {
+    if (error instanceof HTTPException) {
+      throw error;
+    }
+    console.error('OTP resend error:', error);
+    throw new HTTPException(500, { message: 'Failed to resend OTP' });
   }
 });
 

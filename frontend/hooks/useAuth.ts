@@ -53,16 +53,8 @@ export const useAuth = () => {
   };
 };
 
-// Hook for handling auth callbacks
-export const useAuthCallback = () => {
-  const { handleAuthCallback, isLoading, error } = useAuth();
-
-  useEffect(() => {
-    handleAuthCallback().catch(console.error);
-  }, [handleAuthCallback]);
-
-  return { isLoading, error };
-};
+// Hook for handling auth callbacks (removed - causing infinite loops)
+// Use the login page's own auth handling instead
 
 // Hook for protected routes
 export const useRequireAuth = (redirectTo = '/login') => {

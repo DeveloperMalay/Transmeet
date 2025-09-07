@@ -16,11 +16,18 @@ datasource db {
 model User {
   id              String    @id @default(uuid())
   email           String    @unique
+  password        String?   // For email/password auth
   name            String?
+  
+  // Email verification
+  emailVerified   Boolean   @default(false)
+  otp             String?
+  otpExpiresAt    DateTime?
   
   // Zoom OAuth
   zoomUserId      String?   @unique
   zoomEmail       String?
+  zoomConnected   Boolean   @default(false)
   accessToken     String?   @db.Text
   refreshToken    String?   @db.Text
   tokenExpiresAt  DateTime?

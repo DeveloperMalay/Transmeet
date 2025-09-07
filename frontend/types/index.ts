@@ -4,7 +4,10 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  emailVerified: boolean;
   zoomUserId?: string;
+  zoomEmail?: string;
+  zoomConnected: boolean;
 }
 
 export interface AuthState {

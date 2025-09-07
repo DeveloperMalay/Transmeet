@@ -14,7 +14,8 @@ import {
 interface AuthStore extends AuthState {
   error: string | null;
   // Actions
-  login: (code: string) => Promise<void>;
+  login: (data: { user: any; token: string; refreshToken?: string }) => void;
+  loginWithZoom: (code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   getCurrentUser: () => Promise<void>;
@@ -29,7 +30,27 @@ export const useAuthStore = create<AuthStore>()(
       ...getInitialAuthState(),
       error: null,
 
-      login: async (code: string) => {
+      login: (data: { user: any; token: string; refreshToken?: string }) => {
+        const { user, token, refreshToken } = data;
+        
+        createAuthSession(user, token);
+        apiClient.setToken(token);
+        
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+        
+        // Store refresh token if provided
+        if (refreshToken && typeof window !== 'undefined') {
+          localStorage.setItem('transmeet_refresh_token', refreshToken);
+        }
+      },
+
+      loginWithZoom: async (code: string) => {
         try {
           set({ isLoading: true, error: null });
           
@@ -133,16 +154,12 @@ export const useAuthStore = create<AuthStore>()(
           const code = getAuthCodeFromUrl();
           
           if (code) {
-            await get().login(code);
+            await get().loginWithZoom(code);
             clearUrlParams();
             return;
           }
           
-          // If no code and not authenticated, redirect to login
-          const { isAuthenticated } = get();
-          if (!isAuthenticated) {
-            redirectToLogin();
-          }
+          // Don't automatically redirect - let the component handle it
         } catch (error) {
           clearUrlParams();
           throw error;
