@@ -95,7 +95,6 @@ export class ZoomService {
       response_type: 'code',
       client_id: config.zoom.clientId,
       redirect_uri: config.zoom.redirectUri,
-      scope: 'user:read meeting:read recording:read',
     });
 
     return `${config.zoom.authUrl}/authorize?${params.toString()}`;
@@ -106,6 +105,9 @@ export class ZoomService {
    */
   static async exchangeCodeForTokens(code: string): Promise<ZoomTokenResponse> {
     try {
+      console.log('Exchanging code for tokens with Zoom API...');
+      console.log('Using redirect URI:', config.zoom.redirectUri);
+      
       const response = await axios.post(
         `${config.zoom.authUrl}/token`,
         new URLSearchParams({
@@ -121,10 +123,22 @@ export class ZoomService {
         }
       );
 
+      console.log('Token exchange successful');
       return response.data;
     } catch (error: any) {
-      console.error('Zoom token exchange error:', error.response?.data || error.message);
-      throw new HTTPException(400, { message: 'Failed to exchange authorization code' });
+      console.error('Zoom token exchange error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          redirect_uri: config.zoom.redirectUri
+        }
+      });
+      
+      const errorMessage = error.response?.data?.reason || error.response?.data?.error || 'Failed to exchange authorization code';
+      throw new HTTPException(400, { message: errorMessage });
     }
   }
 

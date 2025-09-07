@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Video, CheckCircle, ArrowRight, Shield, Users, FileText, Brain, Link2 } from 'lucide-react';
+import { Video, ArrowRight, Shield, Users, FileText, Brain, Link2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { apiClient } from '@/lib/api';
+import axios from 'axios';
 
 export default function ConnectZoomPage() {
   const router = useRouter();
   const { user, token } = useAuthStore();
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     // Redirect if not logged in or email not verified
@@ -20,7 +19,7 @@ export default function ConnectZoomPage() {
       router.push('/login');
       return;
     }
-    
+
     if (!user.emailVerified) {
       router.push('/verify-email');
       return;
@@ -38,37 +37,27 @@ export default function ConnectZoomPage() {
 
     try {
       // Get Zoom OAuth URL from backend
-      const authUrl = apiClient.getAuthUrl();
-      
-      // Redirect to Zoom OAuth
-      window.location.href = authUrl;
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/zoom`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success && response.data.authUrl) {
+        // Redirect to Zoom OAuth page
+        window.location.href = response.data.authUrl;
+      } else {
+        throw new Error('Failed to get authorization URL');
+      }
     } catch (err: any) {
-      setError('Failed to connect to Zoom. Please try again.');
+      console.error('Connect Zoom error:', err);
+      setError(err.response?.data?.message || 'Failed to connect to Zoom. Please try again.');
       setIsConnecting(false);
     }
   };
-
-  const handleSkip = () => {
-    router.push('/dashboard');
-  };
-
-  if (isConnected) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 dark:bg-green-900">
-            <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
-          </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-            Zoom Connected!
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Redirecting to dashboard...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -95,9 +84,9 @@ export default function ConnectZoomPage() {
             {/* Features List */}
             <div className="space-y-4 mb-8">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                What you'll get:
+                What you&apos;ll get:
               </h3>
-              
+
               <div className="flex items-start">
                 <div className="flex-shrink-0">
                   <Users className="h-6 w-6 text-green-500" />
@@ -163,7 +152,7 @@ export default function ConnectZoomPage() {
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                    Permissions we'll request:
+                    Permissions we&apos;ll request:
                   </h3>
                   <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
                     <ul className="list-disc list-inside space-y-1">
@@ -205,15 +194,6 @@ export default function ConnectZoomPage() {
                   </>
                 )}
               </button>
-
-              {/* Skip Button */}
-              <button
-                onClick={handleSkip}
-                disabled={isConnecting}
-                className="w-full text-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                Skip for now
-              </button>
             </div>
 
             {/* Privacy Notice */}
@@ -223,7 +203,7 @@ export default function ConnectZoomPage() {
                 <a href="#" className="text-blue-600 hover:text-blue-500">
                   Privacy Policy
                 </a>{' '}
-                and Zoom's{' '}
+                and Zoom&apos;s{' '}
                 <a href="#" className="text-blue-600 hover:text-blue-500">
                   Terms of Service
                 </a>

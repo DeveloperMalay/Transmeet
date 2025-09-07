@@ -61,79 +61,99 @@ class ApiClient {
   }
 
   // Authentication endpoints
-  async login(code: string): Promise<ApiResponse<{ user: User; token: string }>> {
-    const response = await this.client.post('/auth/zoom/callback', { code });
+  async loginWithEmail(credentials: { email: string; password: string }): Promise<any> {
+    const response = await this.client.post('/api/auth/login', credentials);
+    return response.data;
+  }
+
+  async registerUser(data: { email: string; password: string; name?: string }): Promise<any> {
+    const response = await this.client.post('/api/auth/register', data);
+    return response.data;
+  }
+
+  async verifyOTP(data: { userId: string; otp: string }): Promise<ApiResponse<any>> {
+    const response = await this.client.post('/api/auth/verify-otp', data);
+    return response.data;
+  }
+
+  async resendOTP(userId: string): Promise<ApiResponse<any>> {
+    const response = await this.client.post('/api/auth/resend-otp', { userId });
+    return response.data;
+  }
+
+  async loginWithZoom(code: string): Promise<ApiResponse<{ user: User; token: string }>> {
+    const response = await this.client.post('/api/auth/zoom/callback', { code });
     return response.data;
   }
 
   async logout(): Promise<void> {
     try {
-      await this.client.post('/auth/logout');
+      await this.client.post('/api/auth/logout');
     } finally {
       this.clearStoredToken();
     }
   }
 
   async refreshToken(): Promise<ApiResponse<{ token: string }>> {
-    const response = await this.client.post('/auth/refresh');
+    const response = await this.client.post('/api/auth/refresh');
     return response.data;
   }
 
   async getCurrentUser(): Promise<ApiResponse<User>> {
-    const response = await this.client.get('/auth/me');
+    const response = await this.client.get('/api/auth/me');
     return response.data;
   }
 
   // Meeting endpoints
   async getMeetings(page = 1, limit = 20): Promise<ApiResponse<PaginatedResponse<Meeting>>> {
-    const response = await this.client.get('/meetings', {
+    const response = await this.client.get('/api/meetings', {
       params: { page, limit }
     });
     return response.data;
   }
 
   async getMeeting(id: string): Promise<ApiResponse<Meeting>> {
-    const response = await this.client.get(`/meetings/${id}`);
+    const response = await this.client.get(`/api/meetings/${id}`);
     return response.data;
   }
 
   async syncMeetings(): Promise<ApiResponse<{ synced: number }>> {
-    const response = await this.client.post('/meetings/sync');
+    const response = await this.client.post('/api/meetings/sync');
     return response.data;
   }
 
   // Transcript endpoints
   async getTranscript(meetingId: string): Promise<ApiResponse<Transcript>> {
-    const response = await this.client.get(`/meetings/${meetingId}/transcript`);
+    const response = await this.client.get(`/api/meetings/${meetingId}/transcript`);
     return response.data;
   }
 
   async generateTranscript(meetingId: string): Promise<ApiResponse<{ status: string }>> {
-    const response = await this.client.post(`/meetings/${meetingId}/transcript/generate`);
+    const response = await this.client.post(`/api/meetings/${meetingId}/transcript/generate`);
     return response.data;
   }
 
   // Summary endpoints
   async getSummary(meetingId: string): Promise<ApiResponse<MeetingSummary>> {
-    const response = await this.client.get(`/meetings/${meetingId}/summary`);
+    const response = await this.client.get(`/api/meetings/${meetingId}/summary`);
     return response.data;
   }
 
   async generateSummary(meetingId: string): Promise<ApiResponse<{ status: string }>> {
-    const response = await this.client.post(`/meetings/${meetingId}/summary/generate`);
+    const response = await this.client.post(`/api/meetings/${meetingId}/summary/generate`);
     return response.data;
   }
 
   // Search endpoints
   async searchTranscripts(query: string): Promise<ApiResponse<SearchResult[]>> {
-    const response = await this.client.get('/search/transcripts', {
+    const response = await this.client.get('/api/search/transcripts', {
       params: { q: query }
     });
     return response.data;
   }
 
   async searchMeetings(query: string): Promise<ApiResponse<Meeting[]>> {
-    const response = await this.client.get('/search/meetings', {
+    const response = await this.client.get('/api/search/meetings', {
       params: { q: query }
     });
     return response.data;
@@ -141,31 +161,31 @@ class ApiClient {
 
   // Export endpoints
   async exportMeeting(request: ExportRequest): Promise<Blob> {
-    const response = await this.client.post('/export', request, {
+    const response = await this.client.post('/api/export', request, {
       responseType: 'blob'
     });
     return response.data;
   }
 
   async getExportStatus(exportId: string): Promise<ApiResponse<{ status: string; downloadUrl?: string }>> {
-    const response = await this.client.get(`/export/${exportId}/status`);
+    const response = await this.client.get(`/api/export/${exportId}/status`);
     return response.data;
   }
 
   // Action item endpoints
   async updateActionItem(itemId: string, updates: Partial<{ status: string; dueDate: string; assignee: string }>): Promise<ApiResponse<void>> {
-    const response = await this.client.patch(`/action-items/${itemId}`, updates);
+    const response = await this.client.patch(`/api/action-items/${itemId}`, updates);
     return response.data;
   }
 
   async createActionItem(meetingId: string, item: { description: string; assignee?: string; dueDate?: string; priority: string }): Promise<ApiResponse<void>> {
-    const response = await this.client.post(`/meetings/${meetingId}/action-items`, item);
+    const response = await this.client.post(`/api/meetings/${meetingId}/action-items`, item);
     return response.data;
   }
 
   // Utility methods
   getAuthUrl(): string {
-    return `${BASE_URL}/auth/zoom`;
+    return `${BASE_URL}/api/auth/zoom`;
   }
 
   setToken(token: string): void {

@@ -77,7 +77,6 @@ export const validateConfig = () => {
   const requiredEnvVars = [
     'DATABASE_URL',
     'JWT_SECRET',
-    'ZOOM_ACCOUNT_ID',
     'ZOOM_CLIENT_ID',
     'ZOOM_CLIENT_SECRET',
     'ZOOM_REDIRECT_URI',

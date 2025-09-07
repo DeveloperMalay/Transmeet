@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User, AuthState } from '@/types';
+import type { AuthState } from '@/types';
 import { apiClient, handleApiError } from '@/lib/api';
-import { 
-  getInitialAuthState, 
-  createAuthSession, 
+import {
+  getInitialAuthState,
+  createAuthSession,
   clearAuthSession,
   getAuthCodeFromUrl,
   clearUrlParams,
@@ -19,6 +19,7 @@ interface AuthStore extends AuthState {
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   getCurrentUser: () => Promise<void>;
+  updateUser: (user: any) => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
   handleAuthCallback: () => Promise<void>;
@@ -32,10 +33,10 @@ export const useAuthStore = create<AuthStore>()(
 
       login: (data: { user: any; token: string; refreshToken?: string }) => {
         const { user, token, refreshToken } = data;
-        
+
         createAuthSession(user, token);
         apiClient.setToken(token);
-        
+
         set({
           user,
           token,
@@ -43,7 +44,7 @@ export const useAuthStore = create<AuthStore>()(
           isLoading: false,
           error: null,
         });
-        
+
         // Store refresh token if provided
         if (refreshToken && typeof window !== 'undefined') {
           localStorage.setItem('transmeet_refresh_token', refreshToken);
@@ -53,13 +54,13 @@ export const useAuthStore = create<AuthStore>()(
       loginWithZoom: async (code: string) => {
         try {
           set({ isLoading: true, error: null });
-          
-          const response = await apiClient.login(code);
+
+          const response = await apiClient.loginWithZoom(code);
           const { user, token } = response.data;
-          
+
           createAuthSession(user, token);
           apiClient.setToken(token);
-          
+
           set({
             user,
             token,
@@ -104,9 +105,9 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const response = await apiClient.refreshToken();
           const { token } = response.data;
-          
+
           apiClient.setToken(token);
-          
+
           set(state => ({
             ...state,
             token,
@@ -127,10 +128,10 @@ export const useAuthStore = create<AuthStore>()(
       getCurrentUser: async () => {
         try {
           set({ isLoading: true, error: null });
-          
+
           const response = await apiClient.getCurrentUser();
           const user = response.data;
-          
+
           set(state => ({
             ...state,
             user,
@@ -149,16 +150,24 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
+      updateUser: (user: any) => {
+        set(state => ({
+          ...state,
+          user,
+          error: null,
+        }));
+      },
+
       handleAuthCallback: async () => {
         try {
           const code = getAuthCodeFromUrl();
-          
+
           if (code) {
             await get().loginWithZoom(code);
             clearUrlParams();
             return;
           }
-          
+
           // Don't automatically redirect - let the component handle it
         } catch (error) {
           clearUrlParams();
@@ -167,7 +176,7 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       clearError: () => set(state => ({ ...state, error: null })),
-      
+
       setLoading: (loading: boolean) => set(state => ({ ...state, isLoading: loading })),
     }),
     {
