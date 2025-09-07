@@ -10,7 +10,9 @@
     "start": "bun dist/index.js",
     "prisma:generate": "bunx prisma generate",
     "prisma:migrate": "bunx prisma migrate dev",
-    "prisma:studio": "bunx prisma studio"
+    "prisma:studio": "bunx prisma studio",
+    "prisma:seed": "bunx tsx prisma/seed.ts",
+    "seed": "bunx tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",

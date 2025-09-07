@@ -20,7 +20,8 @@ export const useMeetings = (autoFetch = true) => {
     if (autoFetch && meetings.length === 0 && !isLoading) {
       fetchMeetings();
     }
-  }, [autoFetch, meetings.length, isLoading, fetchMeetings]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoFetch]); // Only re-run if autoFetch changes, not on every fetchMeetings update
 
   return {
     // State
@@ -57,7 +58,8 @@ export const useMeeting = (meetingId: string | null) => {
     if (meetingId) {
       fetchMeeting(meetingId);
     }
-  }, [meetingId, fetchMeeting]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meetingId]); // Only re-run when meetingId changes
 
   return {
     meeting: currentMeeting,
