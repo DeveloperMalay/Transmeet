@@ -41,36 +41,37 @@ if check_port 3000; then
     sleep 1
 fi
 
-if check_port 4444; then
-    echo -e "${YELLOW}Port 4444 is in use. Attempting to free it...${NC}"
-    lsof -ti:4444 | xargs kill -9 2>/dev/null
+if check_port 4000; then
+    echo -e "${YELLOW}Port 4000 is in use. Attempting to free it...${NC}"
+    lsof -ti:4000 | xargs kill -9 2>/dev/null
     sleep 1
 fi
+
+# Start Backend first (Frontend depends on it)
+echo -e "${GREEN}Starting Backend on port 4000...${NC}"
+cd backend
+PORT=4000 bun run dev &
+BACKEND_PID=$!
+cd ..
+
+# Give backend a moment to start
+sleep 3
 
 # Start Frontend
 echo -e "${GREEN}Starting Frontend on port 3000...${NC}"
 cd frontend
-PORT=3000 bun dev &
+PORT=3000 bun run dev &
 FRONTEND_PID=$!
 cd ..
 
 # Give frontend a moment to start
 sleep 2
 
-# Start Backend
-echo -e "${GREEN}Starting Backend on port 4444...${NC}"
-cd backend
-PORT=4444 bun dev &
-BACKEND_PID=$!
-cd ..
-
-# Give backend a moment to start
-sleep 2
-
 echo "================================"
 echo -e "${GREEN}Services are running:${NC}"
 echo -e "  Frontend: ${YELLOW}http://localhost:3000${NC}"
-echo -e "  Backend:  ${YELLOW}http://localhost:4444${NC}"
+echo -e "  Backend:  ${YELLOW}http://localhost:4000${NC}"
+echo -e "  Health:   ${YELLOW}http://localhost:4000/health${NC}"
 echo "================================"
 echo -e "${YELLOW}Press Ctrl+C to stop all services${NC}"
 
