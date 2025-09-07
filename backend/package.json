@@ -2,6 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "bun --watch src/index.ts",
@@ -17,7 +18,24 @@
   "dependencies": {
     "@hono/node-server": "^1.19.1",
     "@prisma/client": "^6.15.0",
+    "@slack/web-api": "^7.10.0",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/nodemailer": "^7.0.1",
+    "@types/pdfkit": "^0.17.3",
+    "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "docx": "^9.5.1",
     "hono": "^4.9.6",
+    "html-pdf-node": "^1.0.8",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.6",
+    "openai": "^5.19.1",
+    "pdfkit": "^0.17.2",
     "prisma": "^6.15.0"
   },
   "devDependencies": {

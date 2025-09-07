@@ -14,9 +14,110 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(uuid())
+  email           String    @unique
+  name            String?
+  
+  // Zoom OAuth
+  zoomUserId      String?   @unique
+  zoomEmail       String?
+  accessToken     String?   @db.Text
+  refreshToken    String?   @db.Text
+  tokenExpiresAt  DateTime?
+  
+  meetings        Meeting[]
+  tasks           Task[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Meeting {
+  id                String    @id @default(uuid())
+  zoomMeetingId     String    @unique
+  uuid              String?   // Zoom's UUID for recordings
+  topic             String
+  startTime         DateTime
+  endTime           DateTime?
+  duration          Int?      // in minutes
+  recordingUrl      String?   @db.Text
+  recordingPassword String?
+  
+  // Transcript data
+  transcript        Json?     // Full transcript JSON
+  transcriptText    String?   @db.Text // Plain text version for search
+  speakers          Json?     // Speaker identification data
+  
+  // AI Generated content
+  summary           String?   @db.Text
+  bulletPoints      Json?     // Array of bullet points
+  aiNotes           String?   @db.Text
+  
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  tasks             Task[]
+  exports           Export[]
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([userId, startTime])
+  @@index([topic])
+}
+
+model Task {
+  id              String    @id @default(uuid())
+  description     String
+  owner           String?
+  deadline        DateTime?
+  status          TaskStatus @default(PENDING)
+  priority        Priority   @default(MEDIUM)
+  
+  meetingId       String
+  meeting         Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  
+  assignedToId    String?
+  assignedTo      User?     @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  
+  slackMessageId  String?   // Track if sent to Slack
+  emailSent       Boolean   @default(false)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([meetingId, status])
+}
+
+model Export {
+  id              String    @id @default(uuid())
+  format          ExportFormat
+  fileName        String
+  fileUrl         String    @db.Text
+  
+  meetingId       String
+  meeting         Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime  @default(now())
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ExportFormat {
+  PDF
+  MARKDOWN
+  WORD
+  JSON
 }
