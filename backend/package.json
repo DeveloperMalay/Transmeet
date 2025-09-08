@@ -41,7 +41,9 @@
     "prisma": "^6.15.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@types/node": "^24.3.1",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
 }
