@@ -12,6 +12,7 @@ import prisma from './utils/prisma.js';
 import authRoutes from './routes/auth.routes.js';
 import meetingRoutes from './routes/meeting.routes.js';
 import transcriptRoutes from './routes/transcript.routes.js';
+import recordingRoutes from './routes/recording.routes.js';
 
 // Import services for initialization
 import { NotificationService } from './services/notification.service.js';
@@ -80,6 +81,7 @@ app.get('/', (c) => {
       auth: '/api/auth',
       meetings: '/api/meetings',
       transcripts: '/api/transcripts',
+      recordings: '/api/recordings',
     },
   });
 });
@@ -88,6 +90,7 @@ app.get('/', (c) => {
 app.route('/api/auth', authRoutes);
 app.route('/api/meetings', meetingRoutes);
 app.route('/api/transcripts', transcriptRoutes);
+app.route('/api/recordings', recordingRoutes);
 
 // Global error handler
 app.onError((err, c) => {

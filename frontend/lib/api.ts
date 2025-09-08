@@ -122,6 +122,28 @@ class ApiClient {
     return response.data;
   }
 
+  async fetchMeetingRecording(meetingId: string): Promise<ApiResponse<any>> {
+    const response = await this.client.get(`/api/meetings/${meetingId}/recording`);
+    return response.data;
+  }
+
+  async fetchMeetingTranscript(meetingId: string): Promise<ApiResponse<any>> {
+    const response = await this.client.get(`/api/meetings/${meetingId}/transcript`);
+    return response.data;
+  }
+
+  async uploadCSV(file: File): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await this.client.post('/api/meetings/upload-csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
   // Transcript endpoints
   async getTranscript(meetingId: string): Promise<ApiResponse<Transcript>> {
     const response = await this.client.get(`/api/meetings/${meetingId}/transcript`);

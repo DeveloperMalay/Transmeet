@@ -60,17 +60,44 @@ model Meeting {
   bulletPoints      Json?     // Array of bullet points
   aiNotes           String?   @db.Text
   
+  // Source of the meeting data
+  source            String?   @default("ZOOM") // ZOOM, CSV_UPLOAD, MANUAL
+  
   userId            String
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   tasks             Task[]
   exports           Export[]
+  recordings        Recording[]
   
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   
   @@index([userId, startTime])
   @@index([topic])
+}
+
+model Recording {
+  id              String    @id @default(uuid())
+  meetingId       String
+  meeting         Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  
+  fileType        String    // MP4, M4A, TRANSCRIPT, etc
+  fileSize        BigInt    // File size in bytes
+  fileUrl         String    @db.Text // Local or cloud storage URL
+  downloadUrl     String?   @db.Text // Original Zoom download URL
+  playUrl         String?   @db.Text // Original Zoom play URL
+  recordingType   String    // shared_screen_with_speaker_view, audio_only, etc
+  duration        Int?      // Duration in seconds
+  
+  recordingStart  DateTime?
+  recordingEnd    DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([meetingId])
+  @@index([fileType])
 }
 
 model Task {

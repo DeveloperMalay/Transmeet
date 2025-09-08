@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search, Filter, RefreshCw, Calendar, TrendingUp } from 'lucide-react';
+import { Plus, Search, Filter, RefreshCw, Calendar, TrendingUp, Upload } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { MeetingCard } from '@/components/MeetingCard';
@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useMeetings, useMeetingSearch } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   return (
@@ -20,6 +21,7 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const { meetings, isLoading, error, fetchMeetings, clearError } = useMeetings();
   const { query, setQuery, hasQuery, resultCount } = useMeetingSearch();
@@ -100,6 +102,13 @@ function DashboardContent() {
             
             <div className="flex items-center space-x-4">
               <ThemeToggle />
+              <button
+                onClick={() => router.push('/import')}
+                className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </button>
               <button
                 onClick={handleSyncMeetings}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

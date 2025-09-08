@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Video, ArrowRight, Shield, Users, FileText, Brain, Link2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import axios from 'axios';
+import { useZoomAuthUrl } from '@/hooks/useZoomAuth';
 
 export default function ConnectZoomPage() {
   const router = useRouter();
   const { user, token } = useAuthStore();
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { mutate: getZoomAuthUrl, isPending, error } = useZoomAuthUrl();
 
   useEffect(() => {
     // Redirect if not logged in or email not verified
@@ -31,32 +30,8 @@ export default function ConnectZoomPage() {
     }
   }, [user, token, router]);
 
-  const handleConnectZoom = async () => {
-    setIsConnecting(true);
-    setError(null);
-
-    try {
-      // Get Zoom OAuth URL from backend
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/zoom`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success && response.data.authUrl) {
-        // Redirect to Zoom OAuth page
-        window.location.href = response.data.authUrl;
-      } else {
-        throw new Error('Failed to get authorization URL');
-      }
-    } catch (err: any) {
-      console.error('Connect Zoom error:', err);
-      setError(err.response?.data?.message || 'Failed to connect to Zoom. Please try again.');
-      setIsConnecting(false);
-    }
+  const handleConnectZoom = () => {
+    getZoomAuthUrl();
   };
 
   return (
@@ -169,7 +144,7 @@ export default function ConnectZoomPage() {
             {error && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
                 <p className="text-sm text-red-600 dark:text-red-400">
-                  {error}
+                  {error.message || 'Failed to connect to Zoom. Please try again.'}
                 </p>
               </div>
             )}
@@ -178,10 +153,10 @@ export default function ConnectZoomPage() {
             <div className="space-y-4">
               <button
                 onClick={handleConnectZoom}
-                disabled={isConnecting}
+                disabled={isPending}
                 className="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isConnecting ? (
+                {isPending ? (
                   <>
                     <LoadingSpinner size="sm" className="mr-2" />
                     Connecting...

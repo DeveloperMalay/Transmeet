@@ -1,0 +1,68 @@
+topic,date,transcript,duration
+Team Standup Meeting,2024-01-15,"John: Good morning everyone. Let's start with our daily standup. I'll go first. Yesterday I completed the authentication module and today I'll be working on the user dashboard. No blockers.
+
+Sarah: Thanks John. I finished the API integration for the payment system. Today I'm focusing on testing and documentation. I might need help with the webhook setup later.
+
+Mike: I've been debugging the notification system. Found the issue with delayed emails - it was a queue configuration problem. Should have it fixed by noon today.
+
+John: Great progress team. Sarah, I can help with the webhooks after lunch. Mike, let me know if you need any assistance with the notification system.
+
+Sarah: Perfect, thanks John. Also, we should discuss the upcoming sprint planning tomorrow.
+
+Mike: Agreed. I'll prepare the backlog items for review.
+
+John: Excellent. Let's wrap up. Have a productive day everyone!",15
+Sprint Planning Session,2024-01-16,"Product Owner: Welcome to our sprint planning session. Let's review what we accomplished last sprint and plan for the next two weeks.
+
+John: Last sprint we delivered the authentication system, payment integration, and fixed several critical bugs. Our velocity was 34 points.
+
+Sarah: For this sprint, I'd like to prioritize the reporting dashboard. Clients have been asking for better analytics.
+
+Mike: I agree. We should also allocate time for the API v2 migration. Several endpoints need updating.
+
+Product Owner: Good points. Let's estimate these stories. The reporting dashboard seems like an 8-pointer to me.
+
+John: I'd say it's more like a 13. We need to consider the data aggregation complexity.
+
+Sarah: I agree with John. There's also the real-time updates component.
+
+Product Owner: Fair enough. 13 points it is. What about the API migration?
+
+Mike: That's probably another 8 points, assuming no major surprises.
+
+Product Owner: Alright, let's commit to these plus some smaller items to reach our average velocity.
+
+John: Sounds good. I'll take the lead on the dashboard.
+
+Sarah: I'll handle the API migration with Mike's help.
+
+Mike: Perfect. Let's do this!",45
+Customer Feedback Review,2024-01-17,"Support Lead: Thanks for joining the customer feedback review. We've collected responses from 50 users this week.
+
+John: What are the main themes we're seeing?
+
+Support Lead: The top request is for a mobile app. About 60% of respondents mentioned this.
+
+Sarah: That's significant. What's the second most common request?
+
+Support Lead: Better search functionality. Users are having trouble finding old conversations and documents.
+
+Mike: I can work on improving the search algorithm. It shouldn't be too complex.
+
+John: The mobile app is a bigger undertaking. We'd need to decide between native and React Native.
+
+Sarah: I vote for React Native. We can reuse a lot of our existing code.
+
+Support Lead: There were also complaints about the onboarding process being confusing.
+
+John: That's concerning. We should prioritize fixing that.
+
+Mike: Agreed. Poor onboarding affects retention.
+
+Sarah: Let's create a task force to redesign the onboarding flow.
+
+Support Lead: Good idea. I'll compile a detailed report with all the feedback.
+
+John: Thanks. This is really valuable input.
+
+Support Lead: Happy to help. User satisfaction is crucial for our growth.",30
